@@ -1,0 +1,37 @@
+{
+    "appKeys": {
+        "KEY_MONTHELEVATION": 1,
+        "KEY_MONTHMILES": 0,
+        "KEY_TOTALELEVATION": 3,
+        "KEY_TOTALMILES": 2
+    },
+    "capabilities": [
+        ""
+    ],
+    "companyName": "crin@crin.co.uk",
+    "longName": "SG Watch",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/bitmap.png",
+                "name": "BG_IMAGE",
+                "type": "png"
+            },
+            {
+                "characterRegex": "[0123456789:]",
+                "file": "fonts/theboldfont.ttf",
+                "name": "FONT_THEBOLDFONT_REGULAR_52",
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "2",
+    "shortName": "SG Watch",
+    "uuid": "17b1641c-dc24-40f7-aad1-d08eeb3fa657",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
