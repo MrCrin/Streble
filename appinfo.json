@@ -8,7 +8,7 @@
     "capabilities": [
         ""
     ],
-    "companyName": "crin@crin.co.uk",
+    "companyName": "Michael Crinnion",
     "longName": "SG Watch",
     "projectType": "native",
     "resources": {
@@ -21,7 +21,7 @@
             {
                 "characterRegex": "[0123456789:]",
                 "file": "fonts/theboldfont.ttf",
-                "name": "FONT_THEBOLDFONT_REGULAR_52",
+                "name": "FONT_THEBOLDFONT_REGULAR_42",
                 "type": "font"
             }
         ]

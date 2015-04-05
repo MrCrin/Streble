@@ -122,11 +122,13 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));	
 	
 		// Create time layer
-  s_time_layer = text_layer_create(GRect(-2, 52, 146, 52));
+  s_time_layer = text_layer_create(GRect(-1, 58, 148, 52));
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_color(s_time_layer, GColorWhite);
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	 layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_THEBOLDFONT_REGULAR_42));
+  text_layer_set_font(s_time_layer, s_time_font);
 	
 		// Create date layer
   s_date_layer = text_layer_create(GRect(-2, 103, 146, 22));
@@ -134,7 +136,7 @@ static void main_window_load(Window *window) {
   text_layer_set_text_color(s_date_layer, GColorWhite);
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
 	 layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
-	 text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+	 text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	
 		// Create month layer
   s_month_layer = text_layer_create(GRect(-2, 125, 146, 22));
@@ -152,10 +154,6 @@ static void main_window_load(Window *window) {
 	 layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totals_layer));
 	 text_layer_set_font(s_totals_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	 text_layer_set_text(s_totals_layer, "All-Time Totals");
-
-	 //Create and apply custom time font
-	 s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_THEBOLDFONT_REGULAR_52));
-  text_layer_set_font(s_time_layer, s_time_font);
 		
 	 // Make sure the time is displayed from the start
 	 update_time();
@@ -163,7 +161,7 @@ static void main_window_load(Window *window) {
   // Create monthly miles Layer
   s_monthmiles_layer = text_layer_create(GRect(0, 144, 67, 25));
   text_layer_set_background_color(s_monthmiles_layer, GColorClear);
-  text_layer_set_text_color(s_monthmiles_layer, GColorWhite);
+  text_layer_set_text_color(s_monthmiles_layer, GColorBlack);
   text_layer_set_text_alignment(s_monthmiles_layer, GTextAlignmentRight);
   text_layer_set_text(s_monthmiles_layer, "-");
 	 text_layer_set_font(s_monthmiles_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -172,7 +170,7 @@ static void main_window_load(Window *window) {
   // Create monthly elevation Layer
   s_monthelevation_layer = text_layer_create(GRect(76, 144, 65, 25));
   text_layer_set_background_color(s_monthelevation_layer, GColorClear);
-  text_layer_set_text_color(s_monthelevation_layer, GColorWhite);
+  text_layer_set_text_color(s_monthelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_monthelevation_layer, GTextAlignmentLeft);
   text_layer_set_text(s_monthelevation_layer, "-");
 	 text_layer_set_font(s_monthelevation_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -181,7 +179,7 @@ static void main_window_load(Window *window) {
   // Create total miles Layer
   s_totalmiles_layer = text_layer_create(GRect(0, -1, 67, 25));
   text_layer_set_background_color(s_totalmiles_layer, GColorClear);
-  text_layer_set_text_color(s_totalmiles_layer, GColorWhite);
+  text_layer_set_text_color(s_totalmiles_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalmiles_layer, GTextAlignmentRight);
   text_layer_set_text(s_totalmiles_layer, "-");
 	 text_layer_set_font(s_totalmiles_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -190,7 +188,7 @@ static void main_window_load(Window *window) {
   // Create total elevation Layer
   s_totalelevation_layer = text_layer_create(GRect(76, -1, 65, 25));
   text_layer_set_background_color(s_totalelevation_layer, GColorClear);
-  text_layer_set_text_color(s_totalelevation_layer, GColorWhite);
+  text_layer_set_text_color(s_totalelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalelevation_layer, GTextAlignmentLeft);
   text_layer_set_text(s_totalelevation_layer, "-");
 	 text_layer_set_font(s_totalelevation_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
