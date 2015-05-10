@@ -19,6 +19,16 @@
                 "type": "png"
             },
             {
+                "file": "images/nobt.png",
+                "name": "NOBT",
+                "type": "png"
+            },
+            {
+                "file": "images/lowbatt.png",
+                "name": "LOWBATT",
+                "type": "png"
+            },
+            {
                 "characterRegex": "[0123456789:]",
                 "file": "fonts/theboldfont.ttf",
                 "name": "FONT_THEBOLDFONT_REGULAR_42",

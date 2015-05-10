@@ -7,7 +7,11 @@ static TextLayer *s_month_layer;
 static TextLayer *s_totals_layer;
 static GFont s_time_font;
 static BitmapLayer *s_background_layer;
+static BitmapLayer *s_lowbatt_layer;
+static BitmapLayer *s_nobt_layer;
 static GBitmap *s_background_bitmap;
+static GBitmap *s_lowbatt_bitmap;
+static GBitmap *s_nobt_bitmap;
 static TextLayer *s_monthmiles_layer;
 static TextLayer *s_monthelevation_layer;
 static TextLayer *s_totalmiles_layer;
@@ -114,12 +118,46 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
+static void batt_handler(BatteryChargeState charge_state) {
+	 if (charge_state.charge_percent > 20) {
+			 layer_set_hidden(bitmap_layer_get_layer(s_lowbatt_layer), true);
+  } else {
+			 layer_set_hidden(bitmap_layer_get_layer(s_lowbatt_layer), false);
+  }
+}
+
+static void bt_handler(bool connected) {
+  if (connected) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
+			 layer_set_hidden(bitmap_layer_get_layer(s_nobt_layer), true);
+			 vibes_short_pulse();
+  } else {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
+			 layer_set_hidden(bitmap_layer_get_layer(s_nobt_layer), false);
+			 vibes_long_pulse();
+  }
+}
+
 static void main_window_load(Window *window) {
   // Create GBitmap, then set to created BitmapLayer
 	 s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BG_IMAGE);
   s_background_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
   bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));	
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
+	
+	 // Create lowbatt icon
+	 s_lowbatt_bitmap = gbitmap_create_with_resource(RESOURCE_ID_LOWBATT);
+  s_lowbatt_layer = bitmap_layer_create(GRect(12, 48, 19, 10));
+  bitmap_layer_set_bitmap(s_lowbatt_layer, s_lowbatt_bitmap);
+  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_lowbatt_layer));
+ 	batt_handler(battery_state_service_peek());
+	
+		// Create nobt icon
+	 s_nobt_bitmap = gbitmap_create_with_resource(RESOURCE_ID_NOBT);
+  s_nobt_layer = bitmap_layer_create(GRect(115, 45, 19, 11));
+  bitmap_layer_set_bitmap(s_nobt_layer, s_nobt_bitmap);
+	 layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_nobt_layer));
+	 bt_handler(bluetooth_connection_service_peek());
 	
 		// Create time layer
   s_time_layer = text_layer_create(GRect(-1, 58, 148, 52));
@@ -139,7 +177,7 @@ static void main_window_load(Window *window) {
 	 text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	
 		// Create month layer
-  s_month_layer = text_layer_create(GRect(-2, 125, 146, 22));
+  s_month_layer = text_layer_create(GRect(-2, 126, 146, 22));
   text_layer_set_background_color(s_month_layer, GColorClear);
   text_layer_set_text_color(s_month_layer, GColorWhite);
   text_layer_set_text_alignment(s_month_layer, GTextAlignmentCenter);
@@ -147,7 +185,7 @@ static void main_window_load(Window *window) {
 	 text_layer_set_font(s_month_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	
 		// Create totals layer
-  s_totals_layer = text_layer_create(GRect(-2, 17, 146, 22));
+  s_totals_layer = text_layer_create(GRect(-2, 16, 146, 22));
   text_layer_set_background_color(s_totals_layer, GColorClear);
   text_layer_set_text_color(s_totals_layer, GColorWhite);
   text_layer_set_text_alignment(s_totals_layer, GTextAlignmentCenter);
@@ -159,7 +197,7 @@ static void main_window_load(Window *window) {
 	 update_time();
 	
   // Create monthly miles Layer
-  s_monthmiles_layer = text_layer_create(GRect(0, 144, 67, 25));
+  s_monthmiles_layer = text_layer_create(GRect(0, 145, 67, 25));
   text_layer_set_background_color(s_monthmiles_layer, GColorClear);
   text_layer_set_text_color(s_monthmiles_layer, GColorBlack);
   text_layer_set_text_alignment(s_monthmiles_layer, GTextAlignmentRight);
@@ -168,7 +206,7 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_monthmiles_layer));
 	
   // Create monthly elevation Layer
-  s_monthelevation_layer = text_layer_create(GRect(76, 144, 65, 25));
+  s_monthelevation_layer = text_layer_create(GRect(76, 145, 65, 25));
   text_layer_set_background_color(s_monthelevation_layer, GColorClear);
   text_layer_set_text_color(s_monthelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_monthelevation_layer, GTextAlignmentLeft);
@@ -177,7 +215,7 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_monthelevation_layer));
 	
   // Create total miles Layer
-  s_totalmiles_layer = text_layer_create(GRect(0, -1, 67, 25));
+  s_totalmiles_layer = text_layer_create(GRect(0, -2, 67, 25));
   text_layer_set_background_color(s_totalmiles_layer, GColorClear);
   text_layer_set_text_color(s_totalmiles_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalmiles_layer, GTextAlignmentRight);
@@ -186,14 +224,20 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totalmiles_layer));
 	
   // Create total elevation Layer
-  s_totalelevation_layer = text_layer_create(GRect(76, -1, 65, 25));
+  s_totalelevation_layer = text_layer_create(GRect(76, -2, 65, 25));
   text_layer_set_background_color(s_totalelevation_layer, GColorClear);
   text_layer_set_text_color(s_totalelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalelevation_layer, GTextAlignmentLeft);
   text_layer_set_text(s_totalelevation_layer, "-");
 	 text_layer_set_font(s_totalelevation_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totalelevation_layer));
+	 
+	 // Register bluetooth and battery event listeners
+	 bluetooth_connection_service_subscribe(bt_handler);
+	 battery_state_service_subscribe(batt_handler);
 }
+
+
 
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
@@ -210,6 +254,9 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_monthelevation_layer);
   text_layer_destroy(s_totalmiles_layer);
   text_layer_destroy(s_totalelevation_layer);
+	
+	 battery_state_service_unsubscribe();
+  bluetooth_connection_service_unsubscribe();
 }
 
 static void init() {
@@ -236,8 +283,8 @@ static void init() {
 	
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-
 }
+
 
 static void deinit() {
 		// Destroy Window

@@ -9,7 +9,8 @@ var xhrRequest = function (url, type, callback) {
 
 function getStats() {
   // Construct URL
-  var url = "http://crin.co.uk/stravaWatchface/getStats.php";
+  var athlete = "3237232";
+  var url = "http://crin.co.uk/stravaWatchface/getStats.php?a=" + athlete;
 
   // Send request to crin.co.uk
   xhrRequest(url, 'GET', 
