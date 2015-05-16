@@ -1,12 +1,13 @@
 {
     "appKeys": {
+        "KEY_ATHLETE": 4,
         "KEY_MONTHELEVATION": 1,
         "KEY_MONTHMILES": 0,
         "KEY_TOTALELEVATION": 3,
         "KEY_TOTALMILES": 2
     },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "Michael Crinnion",
     "longName": "SG Watch",

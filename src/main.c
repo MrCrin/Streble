@@ -16,13 +16,19 @@ static TextLayer *s_monthmiles_layer;
 static TextLayer *s_monthelevation_layer;
 static TextLayer *s_totalmiles_layer;
 static TextLayer *s_totalelevation_layer;
-
+static int init_complete;
+static char monthmiles_buffer[32];
+static char monthelevation_buffer[32];
+static char totalmiles_buffer[32];
+static char totalelevation_buffer[32];
+static char athlete_buffer[32];
 
 enum {
   KEY_MONTHMILES = 0,
   KEY_MONTHELEVATION = 1,
   KEY_TOTALMILES = 2,
   KEY_TOTALELEVATION = 3,
+	 KEY_ATHLETE = 4
 };
 
 static void update_time() {
@@ -60,13 +66,10 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	  update_time();
 }
 
+//On recieving AppMessage fromn phone
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   (void) context;
-	 static char monthmiles_buffer[32];
-	 static char monthelevation_buffer[32];
-		static char totalmiles_buffer[32];
-		static char totalelevation_buffer[32];
-
+	 
 	 void process_tuple(Tuple *t) {
 		
   //Get key
@@ -76,7 +79,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   char string_value[32];
   strcpy(string_value, t->value->cstring);
  
-  //Decide what to do
+  //Take the value of each key, enter it into the text layer and write to persistant storage
   switch(key) {
     case KEY_MONTHMILES:
       snprintf(monthmiles_buffer, sizeof("000000 mi"), "%s mi", string_value);
@@ -90,7 +93,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     case KEY_TOTALELEVATION:
       snprintf(totalelevation_buffer, sizeof("ft 000000"), "ft %s", string_value);
       text_layer_set_text(s_totalelevation_layer, totalelevation_buffer);
-
       break;
 		}
 }
@@ -106,18 +108,18 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   
 }
 
+//Appmessage debugging
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
 }
-
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
 }
-
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
+//Battery icon, hides when there is more than charge that 20% and unhides when there isn't
 static void batt_handler(BatteryChargeState charge_state) {
 	 if (charge_state.charge_percent > 20) {
 			 layer_set_hidden(bitmap_layer_get_layer(s_lowbatt_layer), true);
@@ -127,14 +129,18 @@ static void batt_handler(BatteryChargeState charge_state) {
 }
 
 static void bt_handler(bool connected) {
-  if (connected) {
+  if (connected) { // Hide the disconnect icon if there is an active connection
     APP_LOG(APP_LOG_LEVEL_INFO, "Phone is connected!");
 			 layer_set_hidden(bitmap_layer_get_layer(s_nobt_layer), true);
+			 if(init_complete){
 			 vibes_short_pulse();
-  } else {
+				}
+  } else { // Unhide the disconnect icon if there is an active connection
     APP_LOG(APP_LOG_LEVEL_INFO, "Phone is not connected!");
 			 layer_set_hidden(bitmap_layer_get_layer(s_nobt_layer), false);
+			 if(init_complete){
 			 vibes_long_pulse();
+				}
   }
 }
 
@@ -154,7 +160,7 @@ static void main_window_load(Window *window) {
 	
 		// Create nobt icon
 	 s_nobt_bitmap = gbitmap_create_with_resource(RESOURCE_ID_NOBT);
-  s_nobt_layer = bitmap_layer_create(GRect(115, 45, 19, 11));
+  s_nobt_layer = bitmap_layer_create(GRect(114, 47, 19, 11));
   bitmap_layer_set_bitmap(s_nobt_layer, s_nobt_bitmap);
 	 layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_nobt_layer));
 	 bt_handler(bluetooth_connection_service_peek());
@@ -192,16 +198,18 @@ static void main_window_load(Window *window) {
 	 layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totals_layer));
 	 text_layer_set_font(s_totals_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
 	 text_layer_set_text(s_totals_layer, "All-Time Totals");
-		
-	 // Make sure the time is displayed from the start
-	 update_time();
-	
+
   // Create monthly miles Layer
   s_monthmiles_layer = text_layer_create(GRect(0, 145, 67, 25));
   text_layer_set_background_color(s_monthmiles_layer, GColorClear);
   text_layer_set_text_color(s_monthmiles_layer, GColorBlack);
   text_layer_set_text_alignment(s_monthmiles_layer, GTextAlignmentRight);
-  text_layer_set_text(s_monthmiles_layer, "-");
+	 if (persist_exists(KEY_MONTHMILES)) { //If a value is stored in persistent storgae use it, otherwise add temporary text.
+			persist_read_string(KEY_MONTHMILES, monthmiles_buffer, sizeof(monthmiles_buffer));
+		 text_layer_set_text(s_monthmiles_layer, monthmiles_buffer);
+  } else {
+			text_layer_set_text(s_monthmiles_layer, "-");
+		}
 	 text_layer_set_font(s_monthmiles_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_monthmiles_layer));
 	
@@ -210,7 +218,12 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_monthelevation_layer, GColorClear);
   text_layer_set_text_color(s_monthelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_monthelevation_layer, GTextAlignmentLeft);
-  text_layer_set_text(s_monthelevation_layer, "-");
+	 if (persist_exists(KEY_MONTHELEVATION)) { //If a value is stored in persistent storgae use it, otherwise add temporary text.
+			persist_read_string(KEY_MONTHELEVATION, monthelevation_buffer, sizeof(monthelevation_buffer));
+		 text_layer_set_text(s_monthelevation_layer, monthelevation_buffer);
+  } else {
+			text_layer_set_text(s_monthelevation_layer, "-");
+		}
 	 text_layer_set_font(s_monthelevation_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_monthelevation_layer));
 	
@@ -219,7 +232,12 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_totalmiles_layer, GColorClear);
   text_layer_set_text_color(s_totalmiles_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalmiles_layer, GTextAlignmentRight);
-  text_layer_set_text(s_totalmiles_layer, "-");
+	 if (persist_exists(KEY_TOTALMILES)) { //If a value is stored in persistent storgae use it, otherwise add temporary text.
+			persist_read_string(KEY_TOTALMILES, totalmiles_buffer, sizeof(totalmiles_buffer));
+		 text_layer_set_text(s_totalmiles_layer, totalmiles_buffer);
+  } else {
+			text_layer_set_text(s_totalmiles_layer, "-");
+		}
 	 text_layer_set_font(s_totalmiles_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totalmiles_layer));
 	
@@ -228,16 +246,22 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_totalelevation_layer, GColorClear);
   text_layer_set_text_color(s_totalelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalelevation_layer, GTextAlignmentLeft);
-  text_layer_set_text(s_totalelevation_layer, "-");
+	 if (persist_exists(KEY_TOTALELEVATION)) { //If a value is stored in persistent storgae use it, otherwise add temporary text.
+			persist_read_string(KEY_TOTALELEVATION, totalelevation_buffer, sizeof(totalelevation_buffer));
+		 text_layer_set_text(s_totalelevation_layer, totalelevation_buffer);
+  } else {
+			text_layer_set_text(s_totalelevation_layer, "-");
+		}
 	 text_layer_set_font(s_totalelevation_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totalelevation_layer));
+			
+	 // Make sure the time is displayed from the start
+	 update_time();
 	 
 	 // Register bluetooth and battery event listeners
 	 bluetooth_connection_service_subscribe(bt_handler);
 	 battery_state_service_subscribe(batt_handler);
 }
-
-
 
 static void main_window_unload(Window *window) {
   // Destroy TextLayer
@@ -283,11 +307,18 @@ static void init() {
 	
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+	
+  //Set init wait variable to true, used to prevent watch vibrating when watch face is first loaded
+	 init_complete = 1;
 }
 
 
 static void deinit() {
 		// Destroy Window
+	 persist_write_string(KEY_MONTHMILES, monthmiles_buffer);
+ 	persist_write_string(KEY_MONTHELEVATION, monthelevation_buffer);
+ 	persist_write_string(KEY_TOTALMILES, totalmiles_buffer);
+ 	persist_write_string(KEY_TOTALELEVATION, totalelevation_buffer);
   window_destroy(s_main_window);
 }
 

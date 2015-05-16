@@ -7,11 +7,59 @@ var xhrRequest = function (url, type, callback) {
   xhr.send();
 };
 
+var persistentkey = 0;
+var athlete = localStorage.getItem(persistentkey);
+
+Pebble.addEventListener("showConfiguration",
+  function(e) {
+    //Load the remote config page
+    Pebble.openURL("http://crin.co.uk/stravaWatchface/config.html");
+  }
+);
+
+Pebble.addEventListener("webviewclosed",
+  function(e) {
+    //Get JSON dictionary
+			 console.log('Pebble Account Token: ' + Pebble.getAccountToken());
+    var configuration = JSON.parse(decodeURIComponent(e.response));
+    console.log("Configuration window returned: " + configuration.athlete);
+			 athlete = configuration.athlete;
+			 localStorage.setItem(persistentkey, configuration.athlete); //Store the latest config data in local storage
+    //Send to Pebble
+    Pebble.sendAppMessage(
+      {"KEY_ATHLETE": configuration.athlete},
+      function(e) {
+        console.log("Sending settings data...");
+							 
+      },
+      function(e) {
+        console.log("Settings feedback failed!");
+      }
+    );
+			 getStats();
+  }
+);
+
+// Listen for when the watchface is opened
+Pebble.addEventListener('ready', 
+  function(e) {
+    console.log("PebbleKit JS ready!");
+    getStats();
+  }
+);
+
+// Listen for when an AppMessage is received
+Pebble.addEventListener('appmessage',
+  function(e) {
+    console.log("AppMessage received!");
+    getStats();
+  }                     
+);
+
 function getStats() {
   // Construct URL
-  var athlete = "3237232";
   var url = "http://crin.co.uk/stravaWatchface/getStats.php?a=" + athlete;
-
+  console.log(url);
   // Send request to crin.co.uk
   xhrRequest(url, 'GET', 
     function(responseText) {
@@ -20,7 +68,7 @@ function getStats() {
 
       // Monthly miles
       var monthMiles = json.mM;
-					console.log("Monthly total miles is: " + monthMiles);
+					 console.log("Monthly total miles is: " + monthMiles);
 
       // Monthly Elevation
       var monthElevation = json.mE;      
@@ -54,23 +102,3 @@ function getStats() {
     }      
   );
 }
-
-
-
-// Listen for when the watchface is opened
-Pebble.addEventListener('ready', 
-  function(e) {
-    console.log("PebbleKit JS ready!");
-
-    // Get the initial weather
-    getStats();
-  }
-);
-
-// Listen for when an AppMessage is received
-Pebble.addEventListener('appmessage',
-  function(e) {
-    console.log("AppMessage received!");
-    getStats();
-  }                     
-);
