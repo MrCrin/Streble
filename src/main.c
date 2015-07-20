@@ -9,6 +9,7 @@ static GFont s_time_font;
 static BitmapLayer *s_background_layer;
 static BitmapLayer *s_lowbatt_layer;
 static BitmapLayer *s_nobt_layer;
+static BitmapLayer *s_refresh_layer;
 static GBitmap *s_background_bitmap;
 static GBitmap *s_lowbatt_bitmap;
 static GBitmap *s_nobt_bitmap;
@@ -66,12 +67,12 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	  update_time();
 }
 
-//On recieving AppMessage fromn phone
+//On receiving AppMessage from phone
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   (void) context;
 	 
 	 void process_tuple(Tuple *t) {
-		
+			
   //Get key
   int key = t->key;
  
@@ -91,7 +92,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       snprintf(totalmiles_buffer, sizeof("000000 mi"), "%s mi", string_value);
       text_layer_set_text(s_totalmiles_layer, totalmiles_buffer);
     case KEY_TOTALELEVATION:
-      snprintf(totalelevation_buffer, sizeof("ft 000000"), "ft %s", string_value);
+      snprintf(totalelevation_buffer, sizeof("ft 0000000"), "ft %s", string_value);
       text_layer_set_text(s_totalelevation_layer, totalelevation_buffer);
       break;
 		}
@@ -157,7 +158,7 @@ static void main_window_load(Window *window) {
   bitmap_layer_set_bitmap(s_lowbatt_layer, s_lowbatt_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_lowbatt_layer));
  	batt_handler(battery_state_service_peek());
-	
+
 		// Create nobt icon
 	 s_nobt_bitmap = gbitmap_create_with_resource(RESOURCE_ID_NOBT);
   s_nobt_layer = bitmap_layer_create(GRect(114, 47, 19, 11));
@@ -168,7 +169,7 @@ static void main_window_load(Window *window) {
 		// Create time layer
   s_time_layer = text_layer_create(GRect(-1, 58, 148, 52));
   text_layer_set_background_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_time_layer, GColorWhite);
+	 text_layer_set_text_color(s_time_layer, GColorWhite);
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
 	 layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
 		s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_THEBOLDFONT_REGULAR_42));
@@ -246,7 +247,7 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_totalelevation_layer, GColorClear);
   text_layer_set_text_color(s_totalelevation_layer, GColorBlack);
   text_layer_set_text_alignment(s_totalelevation_layer, GTextAlignmentLeft);
-	 if (persist_exists(KEY_TOTALELEVATION)) { //If a value is stored in persistent storgae use it, otherwise add temporary text.
+	 if (persist_exists(KEY_TOTALELEVATION)) { //If a value is stored in persistent storage use it, otherwise add temporary text.
 			persist_read_string(KEY_TOTALELEVATION, totalelevation_buffer, sizeof(totalelevation_buffer));
 		 text_layer_set_text(s_totalelevation_layer, totalelevation_buffer);
   } else {
@@ -254,7 +255,7 @@ static void main_window_load(Window *window) {
 		}
 	 text_layer_set_font(s_totalelevation_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_totalelevation_layer));
-			
+				
 	 // Make sure the time is displayed from the start
 	 update_time();
 	 
@@ -270,7 +271,7 @@ static void main_window_unload(Window *window) {
   // Destroy GBitmap
   gbitmap_destroy(s_background_bitmap);
 	
-  // Destroy BitmapLayer
+  // Destroy BitmapLayers
   bitmap_layer_destroy(s_background_layer);
 	
 	 // Destroy stats elements

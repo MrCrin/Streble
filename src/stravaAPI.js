@@ -8,26 +8,27 @@ var xhrRequest = function (url, type, callback) {
 };
 
 var persistentkey = 0;
-var athlete = localStorage.getItem(persistentkey);
+var accessToken = localStorage.getItem(persistentkey);
 
 Pebble.addEventListener("showConfiguration",
   function(e) {
     //Load the remote config page
-    Pebble.openURL("http://crin.co.uk/stravaWatchface/config.html");
+    Pebble.openURL("http://crin.co.uk/stravaWatchface/config.php");
+    console.log("Opened config page...");
   }
 );
 
 Pebble.addEventListener("webviewclosed",
   function(e) {
     //Get JSON dictionary
-			 console.log('Pebble Account Token: ' + Pebble.getAccountToken());
+    console.log('Pebble Account Token: ' + Pebble.getAccountToken());
     var configuration = JSON.parse(decodeURIComponent(e.response));
-    console.log("Configuration window returned: " + configuration.athlete);
-			 athlete = configuration.athlete;
-			 localStorage.setItem(persistentkey, configuration.athlete); //Store the latest config data in local storage
+    console.log("Configuration window returned: " + configuration.accessToken);
+    accessToken = configuration.accessToken;
+    localStorage.setItem(persistentkey, configuration.accessToken); //Store the latest config data in local storage
     //Send to Pebble
     Pebble.sendAppMessage(
-      {"KEY_ATHLETE": configuration.athlete},
+      {"KEY_ATHLETE": configuration.accessToken},
       function(e) {
         console.log("Sending settings data...");
 							 
@@ -36,7 +37,7 @@ Pebble.addEventListener("webviewclosed",
         console.log("Settings feedback failed!");
       }
     );
-			 getStats();
+    getStats();
   }
 );
 
@@ -58,7 +59,7 @@ Pebble.addEventListener('appmessage',
 
 function getStats() {
   // Construct URL
-  var url = "http://crin.co.uk/stravaWatchface/getStats.php?a=" + athlete;
+  var url = "http://crin.co.uk/stravaWatchface/getStats.php?a=" + accessToken;
   console.log(url);
   // Send request to crin.co.uk
   xhrRequest(url, 'GET', 
@@ -68,7 +69,7 @@ function getStats() {
 
       // Monthly miles
       var monthMiles = json.mM;
-					 console.log("Monthly total miles is: " + monthMiles);
+      console.log("Monthly total miles is: " + monthMiles);
 
       // Monthly Elevation
       var monthElevation = json.mE;      

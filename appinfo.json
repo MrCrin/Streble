@@ -10,7 +10,7 @@
         "configurable"
     ],
     "companyName": "Michael Crinnion",
-    "longName": "SG Watch",
+    "longName": "Strebble",
     "projectType": "native",
     "resources": {
         "media": [
@@ -38,7 +38,7 @@
         ]
     },
     "sdkVersion": "2",
-    "shortName": "SG Watch",
+    "shortName": "Strebble",
     "uuid": "17b1641c-dc24-40f7-aad1-d08eeb3fa657",
     "versionCode": 1,
     "versionLabel": "1.0",
