@@ -1,6 +1,7 @@
 {
     "appKeys": {
-        "KEY_ATHLETE": 4,
+        "KEY_GOAL": 5,
+        "KEY_GOALPROGRESS": 4,
         "KEY_MONTHELEVATION": 1,
         "KEY_MONTHMILES": 0,
         "KEY_TOTALELEVATION": 3,
@@ -15,11 +16,6 @@
     "resources": {
         "media": [
             {
-                "file": "images/bitmap.png",
-                "name": "BG_IMAGE",
-                "type": "png"
-            },
-            {
                 "file": "images/nobt.png",
                 "name": "NOBT",
                 "type": "png"
@@ -30,17 +26,25 @@
                 "type": "png"
             },
             {
-                "characterRegex": "[0123456789:]",
-                "file": "fonts/theboldfont.ttf",
-                "name": "FONT_THEBOLDFONT_REGULAR_42",
+                "file": "images/bitmap.png",
+                "name": "BG_IMAGE",
+                "type": "png"
+            },
+            {
+                "characterRegex": "[0123456789]",
+                "file": "fonts/NORMAFIXED.TTF",
+                "name": "FONT_NORMAFIXED_REGULAR_60",
                 "type": "font"
             }
         ]
     },
-    "sdkVersion": "2",
+    "sdkVersion": "3",
     "shortName": "Strebble",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "17b1641c-dc24-40f7-aad1-d08eeb3fa657",
-    "versionCode": 1,
     "versionLabel": "1.0",
     "watchapp": {
         "watchface": true

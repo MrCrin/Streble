@@ -21,14 +21,15 @@ Pebble.addEventListener("showConfiguration",
 Pebble.addEventListener("webviewclosed",
   function(e) {
     //Get JSON dictionary
-    console.log('Pebble Account Token: ' + Pebble.getAccountToken());
     var configuration = JSON.parse(decodeURIComponent(e.response));
-    console.log("Configuration window returned: " + configuration.accessToken);
+    console.log('Pebble Account Token: ' + Pebble.getAccountToken());
+    console.log('Weekly Goal Entered as: ' + configuration.weeklyGoal);
+    console.log("Access Token returned from API: " + configuration.accessToken);
     accessToken = configuration.accessToken;
     localStorage.setItem(persistentkey, configuration.accessToken); //Store the latest config data in local storage
     //Send to Pebble
     Pebble.sendAppMessage(
-      {"KEY_ATHLETE": configuration.accessToken},
+					{"KEY_GOAL":configuration.weeklyGoal},
       function(e) {
         console.log("Sending settings data...");
 							 
@@ -46,6 +47,7 @@ Pebble.addEventListener('ready',
   function(e) {
     console.log("PebbleKit JS ready!");
     getStats();
+    setInterval(function(){getStats();},900000);
   }
 );
 
@@ -82,13 +84,18 @@ function getStats() {
       // Total Elevation
       var totalElevation = json.tE;      
       console.log("All-time total elevation gain is: " + totalElevation);
+					
+      // Total Elevation
+      var goalProgress = json.gP;      
+      console.log("Miles this week: " + goalProgress);
       
       // Assemble dictionary using our keys
       var dictionary = {
        "KEY_MONTHMILES": monthMiles,
        "KEY_MONTHELEVATION": monthElevation,
        "KEY_TOTALMILES": totalMiles,
-							"KEY_TOTALELEVATION": totalElevation
+							"KEY_TOTALELEVATION": totalElevation,
+							"KEY_GOALPROGRESS": goalProgress,
 						};
 
       // Send to Pebble
